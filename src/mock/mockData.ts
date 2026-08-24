@@ -1,13 +1,68 @@
 import type { Subject, Question, UnitHealth, Examination, ExaminationBlueprint, ExaminationPaper, AuditLog, NotificationItem, User } from '../types';
 
-export const currentUser: User = {
-  id: 'USR-2026-089',
-  name: 'Dharshini J',
-  email: 'dharshini.j@examcell.edu',
-  role: 'ADMIN',
-  department: 'Computer Science & Engineering',
-  avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120'
-};
+export interface UserAccount extends User {
+  password: string;
+  defaultTab: string;
+  phone: string;
+  demoOtp: string;
+}
+
+export const mockUsers: UserAccount[] = [
+  {
+    id: 'USR-ADM-001',
+    name: 'Dharshini J',
+    email: 'admin@examcell.edu',
+    password: 'admin@123',
+    role: 'ADMIN',
+    department: 'Central Examination Cell',
+    designation: 'Controller of Examinations (CoE)',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+    defaultTab: 'dashboard',
+    phone: '+91 98765 43210',
+    demoOtp: '582910'
+  },
+  {
+    id: 'USR-HOD-002',
+    name: 'Dr. V. Sundaram',
+    email: 'hod.cse@mvit.edu.in',
+    password: 'hod@123',
+    role: 'HOD',
+    department: 'Computer Science & Engineering',
+    designation: 'Head of Department & Professor',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+    defaultTab: 'dashboard',
+    phone: '+91 98401 23456',
+    demoOtp: '419283'
+  },
+  {
+    id: 'USR-FAC-003',
+    name: 'Dr. K. Ramanathan',
+    email: 'faculty.cs@mvit.edu.in',
+    password: 'faculty@123',
+    role: 'FACULTY',
+    department: 'Computer Science & Engineering',
+    designation: 'Associate Professor & Subject Lead',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    defaultTab: 'question-bank',
+    phone: '+91 97890 12345',
+    demoOtp: '630192'
+  },
+  {
+    id: 'USR-REV-004',
+    name: 'Prof. S. Meenakshi',
+    email: 'reviewer.qp@mvit.edu.in',
+    password: 'reviewer@123',
+    role: 'REVIEWER',
+    department: 'Academic Evaluation Board',
+    designation: 'Senior Question Paper Reviewer',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150',
+    defaultTab: 'review-workspace',
+    phone: '+91 94441 98765',
+    demoOtp: '891024'
+  }
+];
+
+export const currentUser: User = mockUsers[0];
 
 export const mockSubjects: Subject[] = [
   {

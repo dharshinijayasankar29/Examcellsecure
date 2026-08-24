@@ -7,6 +7,7 @@ export interface User {
   role: Role;
   department: string;
   avatarUrl?: string;
+  designation?: string;
 }
 
 export type BloomLevel = 'Remember' | 'Understand' | 'Apply' | 'Analyze' | 'Evaluate' | 'Create';

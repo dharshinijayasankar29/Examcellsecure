@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Role, Question, ExaminationPaper, NotificationItem, GeneratedPaperQuestion } from '../types';
-import { mockQuestions, mockExaminationPaper, mockNotifications, currentUser } from '../mock/mockData';
+import type { Role, Question, ExaminationPaper, NotificationItem, GeneratedPaperQuestion, User } from '../types';
+import { mockQuestions, mockExaminationPaper, mockNotifications, mockUsers, type UserAccount } from '../mock/mockData';
 
 export interface ToastMessage {
   id: string;
@@ -9,6 +9,13 @@ export interface ToastMessage {
 }
 
 interface AppContextType {
+  isAuthenticated: boolean;
+  setIsAuthenticated: (auth: boolean) => void;
+  user: User;
+  setUser: (u: User) => void;
+  login: (userAcc: UserAccount) => void;
+  logout: () => void;
+  
   role: Role;
   setRole: (role: Role) => void;
   activeTab: string;
@@ -41,17 +48,39 @@ interface AppContextType {
   toasts: ToastMessage[];
   addToast: (message: string, type?: 'success' | 'info' | 'warning' | 'danger') => void;
   removeToast: (id: string) => void;
-
-  user: typeof currentUser;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<Role>('ADMIN');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User>(mockUsers[0]);
+  const [role, setRoleState] = useState<Role>('ADMIN');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+
+  const setRole = (newRole: Role) => {
+    setRoleState(newRole);
+    // Find matching mock user if available to keep user profile consistent
+    const matchingUser = mockUsers.find((u) => u.role === newRole);
+    if (matchingUser) {
+      setUser(matchingUser);
+    }
+  };
+
+  const login = (userAcc: UserAccount) => {
+    setUser(userAcc);
+    setRoleState(userAcc.role);
+    setIsAuthenticated(true);
+    setActiveTab(userAcc.defaultTab);
+    addToast(`Welcome back, ${userAcc.name}! Signed in as ${userAcc.role}.`, 'success');
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    addToast('You have been logged out securely.', 'info');
+  };
 
   // Apply dark-theme class to <html> so ALL CSS variables work globally
   useEffect(() => {
@@ -164,7 +193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPaper((prev) => ({
       ...prev,
       status: 'Locked',
-      lockedBy: currentUser.name,
+      lockedBy: user.name,
       lockedAt: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
     }));
     addToast(`🔒 Examination Paper ${paper.id} has been LOCKED and tamper-sealed.`, 'warning');
@@ -173,6 +202,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider
       value={{
+        isAuthenticated,
+        setIsAuthenticated,
+        user,
+        setUser,
+        login,
+        logout,
         role,
         setRole,
         activeTab,
@@ -199,12 +234,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsGlobalSearchOpen,
         toasts,
         addToast,
-        removeToast,
-        user: currentUser
+        removeToast
       }}
-      >
-        {children}
-      </AppContext.Provider>
+    >
+      {children}
+    </AppContext.Provider>
   );
 };
 

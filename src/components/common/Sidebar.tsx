@@ -7,6 +7,8 @@ import {
   ShieldAlert,
   ChevronLeft,
   ChevronRight,
+  LogOut,
+  Shield
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import type { Role } from '../../types';
@@ -21,7 +23,7 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { role, activeTab, setActiveTab, sidebarCollapsed, setSidebarCollapsed } = useApp();
+  const { role, activeTab, setActiveTab, sidebarCollapsed, setSidebarCollapsed, user, logout } = useApp();
 
   const navItems: NavItem[] = [
     {
@@ -125,6 +127,34 @@ export const Sidebar: React.FC = () => {
               )}
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Bottom User & Logout Card */}
+      <div className="sidebar-footer-container">
+        {!sidebarCollapsed ? (
+          <div className="sidebar-user-card">
+            <img src={user.avatarUrl} alt={user.name} className="sidebar-user-avatar" />
+            <div className="sidebar-user-meta">
+              <span className="sidebar-user-name">{user.name}</span>
+              <span className="sidebar-user-role">{role} Access</span>
+            </div>
+            <button
+              className="sidebar-logout-btn"
+              onClick={logout}
+              title="Sign Out of Session"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
+        ) : (
+          <button
+            className="sidebar-collapsed-logout-btn"
+            onClick={logout}
+            title={`Sign out (${user.name})`}
+          >
+            <LogOut size={16} />
+          </button>
         )}
       </div>
 
@@ -300,6 +330,92 @@ export const Sidebar: React.FC = () => {
         .upload-section.collapsed .upload-quick-btn {
           justify-content: center;
           padding: 10px 0;
+        }
+
+        /* Sidebar Footer & User Card */
+        .sidebar-footer-container {
+          padding: 10px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-user-card {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px 8px;
+          border-radius: var(--radius-md);
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-user-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1.5px solid var(--brand-accent);
+          flex-shrink: 0;
+        }
+
+        .sidebar-user-meta {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          overflow: hidden;
+        }
+
+        .sidebar-user-name {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #e2e8f0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+          font-size: 9.5px;
+          color: #94a3b8;
+          text-transform: capitalize;
+        }
+
+        .sidebar-logout-btn {
+          background: transparent;
+          border: none;
+          color: #ef4444;
+          cursor: pointer;
+          padding: 6px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
+          flex-shrink: 0;
+        }
+
+        .sidebar-logout-btn:hover {
+          background: rgba(239, 68, 68, 0.15);
+          color: #f87171;
+        }
+
+        .sidebar-collapsed-logout-btn {
+          width: 100%;
+          height: 38px;
+          background: transparent;
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: var(--radius-md);
+          color: #ef4444;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .sidebar-collapsed-logout-btn:hover {
+          background: rgba(239, 68, 68, 0.15);
+          color: #f87171;
         }
       `}</style>
     </aside>

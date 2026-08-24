@@ -47,10 +47,15 @@ const MainContent: React.FC = () => {
 };
 
 const AppShell: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const { isAuthenticated } = useApp();
 
   if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
+    return (
+      <>
+        <LoginPage />
+        <Toast />
+      </>
+    );
   }
 
   return (
