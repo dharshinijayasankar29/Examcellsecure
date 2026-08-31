@@ -186,7 +186,7 @@ export const BlueprintView: React.FC = () => {
     addToast('Distributed weights equally across all syllabus units.', 'info');
   };
 
-  // Close calendar popup on outside click
+  // Close calendar popup on outside click and sync month/year
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
@@ -195,9 +195,14 @@ export const BlueprintView: React.FC = () => {
     };
     if (isCalendarOpen) {
       document.addEventListener('mousedown', handleOutsideClick);
+      const d = new Date(examDate);
+      if (!isNaN(d.getTime())) {
+        setCalendarViewYear(d.getFullYear());
+        setCalendarViewMonth(d.getMonth());
+      }
     }
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [isCalendarOpen]);
+  }, [isCalendarOpen, examDate]);
 
   // Calendar date generator
   const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
@@ -916,6 +921,7 @@ export const BlueprintView: React.FC = () => {
           margin-bottom: 28px;
           border: 1px solid var(--border-color);
           box-shadow: var(--shadow-sm);
+          overflow: visible !important;
         }
 
         .step1-body {
@@ -923,6 +929,7 @@ export const BlueprintView: React.FC = () => {
           display: flex;
           flex-direction: column;
           gap: 20px;
+          overflow: visible !important;
         }
 
         .step1-controls-grid {
@@ -930,6 +937,8 @@ export const BlueprintView: React.FC = () => {
           grid-template-columns: 2fr 1.2fr 1.2fr;
           gap: 20px;
           align-items: start;
+          position: relative;
+          z-index: 25;
         }
 
         .control-group {
@@ -1174,14 +1183,14 @@ export const BlueprintView: React.FC = () => {
 
         .theme-calendar-popup {
           position: absolute;
-          top: calc(100% + 6px);
+          top: calc(100% + 8px);
           left: 0;
-          width: 290px;
+          width: 310px;
           background: var(--bg-secondary);
           border: 1px solid var(--border-color);
           border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-xl);
-          z-index: 60;
+          box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.28), 0 6px 16px -2px rgba(0, 0, 0, 0.18);
+          z-index: 100;
           padding: 16px;
           animation: dropdownFade 0.15s ease;
         }
@@ -1200,8 +1209,8 @@ export const BlueprintView: React.FC = () => {
         }
 
         .cal-nav-btn {
-          width: 28px;
-          height: 28px;
+          width: 30px;
+          height: 30px;
           border-radius: var(--radius-sm);
           background: var(--bg-tertiary);
           border: 1px solid var(--border-color);
@@ -1241,11 +1250,12 @@ export const BlueprintView: React.FC = () => {
         }
 
         .cal-cell {
-          height: 32px;
+          height: 34px;
+          min-height: 34px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
+          font-size: 12.5px;
           border-radius: var(--radius-sm);
         }
 
@@ -1261,6 +1271,7 @@ export const BlueprintView: React.FC = () => {
         .day-cell:hover {
           background: var(--bg-hover);
           border-color: var(--brand-accent);
+          color: var(--brand-accent);
         }
 
         .day-cell.selected {
@@ -1273,19 +1284,20 @@ export const BlueprintView: React.FC = () => {
         .cal-footer {
           display: flex;
           justify-content: space-between;
-          margin-top: 12px;
+          align-items: center;
+          margin-top: 14px;
           padding-top: 10px;
           border-top: 1px solid var(--border-color);
         }
 
         .cal-quick-btn {
-          font-size: 11px;
+          font-size: 11.5px;
           font-weight: 700;
           color: var(--brand-accent);
           background: transparent;
           border: none;
           cursor: pointer;
-          padding: 2px 6px;
+          padding: 4px 8px;
           border-radius: var(--radius-sm);
         }
 

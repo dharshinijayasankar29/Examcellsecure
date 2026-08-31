@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   UploadCloud,
   CheckCircle,
@@ -8,15 +8,26 @@ import {
   ArrowLeft,
   Database,
   FileCheck,
-  Sparkles
+  Sparkles,
+  GraduationCap,
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { mockSubjects } from '../../mock/mockData';
 
 export const UploadWizardModal: React.FC = () => {
   const { setActiveTab, addToast } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState(mockSubjects[0].code);
+  const [selectedUnit, setSelectedUnit] = useState<number | 'all'>('all');
   const [fileName, setFileName] = useState('CS3501_Unit4_Import.docx');
   const [isDragOver, setIsDragOver] = useState(false);
+
+  const selectedSubject = useMemo(
+    () => mockSubjects.find((s) => s.code === selectedSubjectCode) || mockSubjects[0],
+    [selectedSubjectCode]
+  );
 
   const [issueFixes, setIssueFixes] = useState<{ [key: string]: string }>({
     issue1: 'Unit 4',
@@ -96,9 +107,91 @@ export const UploadWizardModal: React.FC = () => {
                 <span className="step-label-pill">Step 1 of 5</span>
                 <h4 className="step-heading">Select Your Question File</h4>
                 <p className="step-desc">
-                  Upload a Word, PDF, Excel, or CSV file containing your questions.
-                  We support all common formats.
+                  Choose the target subject and syllabus unit, then upload your question document.
                 </p>
+              </div>
+
+              {/* Faculty Subject & Unit Assignment Controls */}
+              <div className="upload-target-selection-card">
+                <div className="selection-header-row">
+                  <div className="selection-section-title">
+                    <GraduationCap size={16} className="text-blue-600" />
+                    <span>Select Target Subject &amp; Syllabus Unit</span>
+                  </div>
+                  <span className="selection-badge">Faculty Assignment</span>
+                </div>
+
+                <div className="selection-controls-grid">
+                  {/* Subject Name & Subject Code Picker */}
+                  <div className="selection-field-group">
+                    <label className="field-label">
+                      <BookOpen size={13} /> Subject Name &amp; Code
+                    </label>
+                    <div className="subject-select-wrapper">
+                      <select
+                        className="subject-dropdown-select"
+                        value={selectedSubjectCode}
+                        onChange={(e) => {
+                          const code = e.target.value;
+                          setSelectedSubjectCode(code);
+                          setSelectedUnit('all');
+                          setFileName(`${code}_Questions_Import.docx`);
+                        }}
+                      >
+                        {mockSubjects.map((sub) => (
+                          <option key={sub.code} value={sub.code}>
+                            {sub.code} — {sub.name} (Sem {sub.semester})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Syllabus Unit Selector Buttons */}
+                  <div className="selection-field-group">
+                    <label className="field-label">
+                      <Layers size={13} /> Target Syllabus Unit
+                    </label>
+                    <div className="unit-pills-row">
+                      <button
+                        type="button"
+                        className={`unit-pill-btn ${selectedUnit === 'all' ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedUnit('all');
+                          setFileName(`${selectedSubjectCode}_AllUnits_Import.docx`);
+                        }}
+                      >
+                        All Units (Auto)
+                      </button>
+                      {selectedSubject.units.map((u) => (
+                        <button
+                          key={u.number}
+                          type="button"
+                          className={`unit-pill-btn ${selectedUnit === u.number ? 'active' : ''}`}
+                          onClick={() => {
+                            setSelectedUnit(u.number);
+                            setFileName(`${selectedSubjectCode}_Unit${u.number}_Import.docx`);
+                          }}
+                          title={`Unit ${u.number}: ${u.name}`}
+                        >
+                          Unit {u.number}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active Context Banner */}
+                <div className="selected-context-banner">
+                  <span className="context-chip">{selectedSubject.code}</span>
+                  <span className="context-subject-name">{selectedSubject.name}</span>
+                  <span className="context-separator">•</span>
+                  <span className="context-unit-info">
+                    {selectedUnit === 'all'
+                      ? 'All Syllabus Units (AI Auto-Distribution)'
+                      : `Unit ${selectedUnit}: ${selectedSubject.units.find((u) => u.number === selectedUnit)?.name || ''}`}
+                  </span>
+                </div>
               </div>
 
               <div
@@ -327,11 +420,14 @@ export const UploadWizardModal: React.FC = () => {
               <p className="final-desc">
                 <strong>32 questions</strong> have been reviewed, quality-checked, and are ready
                 to be added to the Question Bank for{' '}
-                <strong>CS3501 — Theory of Computation</strong>.
+                <strong>{selectedSubject.code} — {selectedSubject.name}</strong>
+                {selectedUnit !== 'all' ? ` (Unit ${selectedUnit})` : ''}.
               </p>
               <div className="final-summary-pills">
                 <span className="summary-pill">32 Questions</span>
-                <span className="summary-pill">5 Units Covered</span>
+                <span className="summary-pill">
+                  {selectedUnit === 'all' ? `${selectedSubject.units.length} Units Covered` : `Unit ${selectedUnit}`}
+                </span>
                 <span className="summary-pill">94.2% Avg. Originality</span>
                 <span className="summary-pill">0 Duplicates</span>
               </div>
@@ -535,6 +631,165 @@ export const UploadWizardModal: React.FC = () => {
           color: var(--text-muted);
           line-height: 1.6;
           margin: 0;
+        }
+
+        /* Subject & Unit Selection Card in Upload Wizard */
+        .upload-target-selection-card {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-lg);
+          padding: 16px 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .selection-header-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 8px;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .selection-section-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+
+        .selection-badge {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--brand-accent);
+          background: rgba(37, 99, 235, 0.08);
+          padding: 2px 8px;
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .selection-controls-grid {
+          display: grid;
+          grid-template-columns: 1.3fr 1.7fr;
+          gap: 16px;
+          align-items: start;
+        }
+
+        @media (max-width: 768px) {
+          .selection-controls-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .selection-field-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .field-label {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: var(--text-secondary);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .subject-dropdown-select {
+          width: 100%;
+          padding: 8px 12px;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius-md);
+          color: var(--text-primary);
+          font-size: 13px;
+          font-weight: 600;
+          outline: none;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .subject-dropdown-select:hover,
+        .subject-dropdown-select:focus {
+          border-color: var(--brand-accent);
+          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        .unit-pills-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .unit-pill-btn {
+          padding: 6px 12px;
+          font-size: 12px;
+          font-weight: 600;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          color: var(--text-secondary);
+          border-radius: var(--radius-md);
+          cursor: pointer;
+          transition: all 0.15s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .unit-pill-btn:hover {
+          background: var(--bg-hover);
+          color: var(--text-primary);
+          border-color: var(--brand-accent);
+        }
+
+        .unit-pill-btn.active {
+          background: var(--brand-accent);
+          color: #ffffff;
+          border-color: var(--brand-accent);
+          font-weight: 700;
+          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+        }
+
+        .selected-context-banner {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: var(--bg-secondary);
+          border: 1px dashed var(--border-color);
+          border-radius: var(--radius-md);
+          padding: 8px 12px;
+          font-size: 12px;
+          flex-wrap: wrap;
+        }
+
+        .context-chip {
+          background: var(--brand-accent);
+          color: white;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 2px 7px;
+          border-radius: var(--radius-sm);
+        }
+
+        .context-subject-name {
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+
+        .context-separator {
+          color: var(--text-muted);
+        }
+
+        .context-unit-info {
+          color: var(--text-secondary);
+          font-weight: 500;
         }
 
         /* Dropzone */
